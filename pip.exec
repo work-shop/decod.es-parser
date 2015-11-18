@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [ ! -d ".env" ]; then
+	./setup.sh
+fi
+
+./.env/bin/pip $@
