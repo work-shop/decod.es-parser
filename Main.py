@@ -1,7 +1,10 @@
 import sys, getopt
+from Parser import ASTParser
+
 
 def parse( filepath ):
-	print 'Input file path is', filepath
+	parser = ASTParser( filepath )
+	print parser.parse()
 
 def main( argv ):
 	helpstring = argv[ 0 ] + " {-p|--parse} <input filepath>"
@@ -27,6 +30,7 @@ def main( argv ):
 			filepath = arg
 
 	parse( filepath )
+	sys.exit()
 
 
 if __name__ == "__main__":
