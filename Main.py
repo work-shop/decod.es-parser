@@ -1,10 +1,9 @@
-import sys, getopt
+import sys, getopt, json
 from Parser import ASTParser
 
 
 def parse( filepath ):
-	parser = ASTParser( filepath )
-	print parser.parse()
+	print ASTParser( filepath ).parse()
 
 def main( argv ):
 	helpstring = argv[ 0 ] + " {-p|--parse} <input filepath>"
