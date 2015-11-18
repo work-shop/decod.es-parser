@@ -2,7 +2,6 @@
 import os
 import ast
 import json
-import jsonpickle
 
 from Serializer import ASTSerializer
 
@@ -29,15 +28,37 @@ class ASTParser:
 
 		except (OSError, IOError) as e:
 
-			return {
+			return json.dumps({
 				"success": False,
 				"message": os.strerror( e.errno ),
 				"filepath": self.filepath
-			};
+			});
 
-		return self.serialize( ast.parse( self.quote ) )
+		try:
+
+			serialized = self.serialize( ast.parse( self.quote ) )
+
+			return json.dumps({
+				"success": True,
+				"message": None,
+				"filepath": self.filepath,
+				"ast": serialized
+			});
+
+		except (SyntaxError) as e:
+
+			return json.dumps({
+				"success": False,
+				"message": str( e ),
+				"context": e.text,
+				"filepath": self.filepath,
+				"position": {
+					"line": e.lineno,
+					"offset": e.offset
+				}
+
+			});
 
 
 	def serialize( self, result ):
-		#return json.dumps( result, default = lambda o: o.__dict__ )
-		return json.dumps( ASTSerializer().visit( result ), default = lambda o: o.__dict__ )
+		return ASTSerializer().visit( result )
