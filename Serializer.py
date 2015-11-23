@@ -215,7 +215,7 @@ class ASTSerializer( ast.NodeTransformer ):
 		return {
 			"expr": "Expression",
 			"type": "Call",
-			"function": self.guard( node, "func" ),
+			"function": self.guard( node, "func", f = self.visit ),
 			"args": self.guard( node, "args", f = lambda x : map( self.visit, x ) ),
 			"keywords": self.guard( node, "keywords", f = lambda x : map( self.visit, x ) ),
 			"starargs": self.guard( node, "starargs", f = lambda x : map( self.visit, x ) ),
@@ -266,8 +266,8 @@ class ASTSerializer( ast.NodeTransformer ):
 		return {
 			"expr": "Subscript",
 			"type": "Subscript",
-			"value": self.visit( node.value ),
-			"slice": self.visit( node.slice ),
+			"value": self.guard( node, "value", f = self.visit ),
+			"slice": self.guard( node, "slide", f = self.visit ),
 			"position": {
 				'line': node.lineno
 			},
@@ -364,12 +364,9 @@ class ASTSerializer( ast.NodeTransformer ):
 		return {
 			"expr": "Comprehension",
 			"type": "Comprehension",
-			"target": self.visit( node.key ),
-			"iter": self.visit( node.iter ),
-			"ifs": map( self.visit, node.ifs ),
-			"position": {
-				'line': node.lineno
-			},
+			"target": self.guard( node, "target", f = self.visit ),
+			"iter": self.guard( node, "iter", f = self.visit ),
+			"ifs": self.guard( node, "ifs", f = lambda x : map(self.visit, x) ),
 			"docstring": False		
 		}
 
@@ -404,8 +401,8 @@ class ASTSerializer( ast.NodeTransformer ):
 		return {
 			"expr": "Statement",
 			"type": "Print",
-			"dest": self.visit( node.dest ),
-			"values": map( self.visit, node.value ),
+			"dest": self.guard( node, "dest", f = self.visit ),
+			"values": self.guard( node, "values", f = lambda x : map( self.visit, x )  ),
 			"newline": node.nl,
 			"position": {
 				'line': node.lineno
@@ -430,8 +427,8 @@ class ASTSerializer( ast.NodeTransformer ):
 			return {
 				"expr": "Statement",
 				"type": "Raise",
-				"exc": self.visit( node.exc ),
-				"cause": self.visit( node.cause ) if node.cause is not None else None,
+				"exc": self.guard( node, "exc", f = self.visit ),
+				"cause": self.guard( node, "body", f = self.visit ),
 				"position": {
 					'line': node.lineno
 				},
@@ -491,7 +488,7 @@ class ASTSerializer( ast.NodeTransformer ):
 			"expr": "Import",
 			"type": "ImportFrom",
 			"module": node.module,
-			"names": map( self.visit, node.names ),
+			"names": self.guard( node, "names", f = lambda x : map( self.visit, x )  ),
 			"level": node.level,
 			"position": {
 				'line': node.lineno
@@ -575,10 +572,10 @@ class ASTSerializer( ast.NodeTransformer ):
 		return {
 			"expr": "ControlFlow",
 			"type": "Try",
-			"body": map( self.visit, node.body ),
-			"handlers": map( self.visit, node.handlers ),
-			"orelse": map( self.visit, node.orelse ),
-			"finalbody": map( self.visit, node.finalbody ),
+			"body": self.guard( node, "body", f = lambda x : map( self.visit, x )  ),
+			"handlers": self.guard( node, "handlers", f = lambda x : map( self.visit, x )  ),
+			"orelse": self.guard( node, "orelse", f = lambda x : map( self.visit, x )  ),
+			"finalbody": self.guard( node, "finalbody", f = lambda x : map( self.visit, x )  ),
 			"position": {
 				'line': node.lineno
 			},
@@ -589,8 +586,8 @@ class ASTSerializer( ast.NodeTransformer ):
 		return {
 			"expr": "ControlFlow",
 			"type": "TryFinally",
-			"body": map( self.visit, node.body ),
-			"finalbody": map( self.visit, node.finalbody ),
+			"body": self.guard( node, "body", f = lambda x : map( self.visit, x )  ),
+			"finalbody": self.guard( node, "finalbody", f = lambda x : map( self.visit, x )  ),
 			"position": {
 				'line': node.lineno
 			},
@@ -601,9 +598,9 @@ class ASTSerializer( ast.NodeTransformer ):
 		return {
 			"expr": "ControlFlow",
 			"type": "TryExcept",
-			"body": map( self.visit, node.body ),
-			"handlers": map( self.visit, node.handlers ),
-			"orelse": map( self.visit, node.orelse ),
+			"body": self.guard( node, "body", f = lambda x : map( self.visit, x )  ),
+			"handlers": self.guard( node, "handlers", f = lambda x : map( self.visit, x )  ),
+			"orelse": self.guard( node, "orelse", f = lambda x : map( self.visit, x )  ),
 			"position": {
 				'line': node.lineno
 			},
@@ -614,9 +611,9 @@ class ASTSerializer( ast.NodeTransformer ):
 		return {
 			"expr": "ControlFlow",
 			"type": "ExceptHandler",
-			"exnType": self.visit( node.type ),
+			"exnType": self.guard( node, "type", f = self.visit  ),
 			"name": node.name,
-			"body": map( self.visit, node.body ),
+			"body": self.guard( node, "body", f = lambda x : map( self.visit, x )  ),
 			"position": {
 				'line': node.lineno
 			},
@@ -627,8 +624,8 @@ class ASTSerializer( ast.NodeTransformer ):
 		return {
 			"expr": "ControlFlow",
 			"type": "With",
-			"items": map( self.visit, node.type ),
-			"body": map( self.visit, node.body ),
+			"items": self.guard( node, "items", f = lambda x : map( self.visit, x )  ),
+			"body": self.guard( node, "body", f = lambda x : map( self.visit, x )  ),
 			"position": {
 				'line': node.lineno
 			},
@@ -833,7 +830,7 @@ class ASTSerializer( ast.NodeTransformer ):
 
 	def visit_Is( self, node ): return "is"
 
-	def visit_isNot( self, node ): return "is not"
+	def visit_IsNot( self, node ): return "is not"
 
 	def visit_In( self, node ): return "in"
 

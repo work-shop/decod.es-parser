@@ -21,7 +21,6 @@ class ASTParser:
 
 	def parse( self ):
 		try:
-
 			f = open( self.filepath, 'r' )
 			self.quote = f.read()
 			f.close()
