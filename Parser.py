@@ -30,6 +30,7 @@ class ASTParser:
 			return json.dumps({
 				"success": False,
 				"message": os.strerror( e.errno ),
+				"errno": e.errno,
 				"filepath": self.filepath
 			});
 
@@ -49,6 +50,7 @@ class ASTParser:
 			return json.dumps({
 				"success": False,
 				"message": str( e ),
+				"errno": -1,
 				"context": e.text,
 				"filepath": self.filepath,
 				"position": {

@@ -218,8 +218,8 @@ class ASTSerializer( ast.NodeTransformer ):
 			"function": self.guard( node, "func", f = self.visit ),
 			"args": self.guard( node, "args", f = lambda x : map( self.visit, x ) ),
 			"keywords": self.guard( node, "keywords", f = lambda x : map( self.visit, x ) ),
-			"starargs": self.guard( node, "starargs", f = lambda x : map( self.visit, x ) ),
-			"kwargs": self.guard( node, "kwargs", f = lambda x : map( self.visit, x ) ),
+			"starargs": self.guard( node, "starargs", f = self.visit ),
+			"kwargs": self.guard( node, "kwargs", f = self.visit ),
 			"position": {
 				'line': node.lineno
 			},
@@ -679,8 +679,8 @@ class ASTSerializer( ast.NodeTransformer ):
 			"type": "Arguments",
 			"args": map( self.visit, node.args ),
 			"kwonlyargs": map( self.visit, node.kwonlyargs ) if hasattr(node, "kwonlyargs") else None,
-			"vararg": self.visit( node.vararg ) if node.vararg is not None else None,
-			"kwarg": self.visit( node.kwarg ) if node.kwarg is not None else None,
+			"vararg": node.vararg, #self.guard( node, "vararg", f = self.visit ),
+			"kwarg": node.kwarg, #self.guard( node, "kwarg", f = self.visit ),
 			"defaults": map( self.visit, node.defaults ),
 			"kw_defaults": map( self.visit, node.kw_defaults ) if hasattr(node, "kw_defaults") else None,  
 			"docstring": False		
